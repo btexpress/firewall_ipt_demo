@@ -1,0 +1,17 @@
+---
+- hosts:  webserver
+
+  tasks:
+  - name:  test this block
+    become: true
+    command: "{{ item }}"
+    with_items:
+      - hostname
+      - date
+      - touch /tmp/DELETEME
+
+
+# Allow all IPv4 traffic coming in on port 80 (http)
+  - iptables_raw:
+    name: allow_tcp_80
+    rules: '-A INPUT -p tcp -m tcp --dport 80 -j ACCEPT'

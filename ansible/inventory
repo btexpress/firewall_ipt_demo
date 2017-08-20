@@ -1,0 +1,8 @@
+[webserver]
+wordpress
+
+[webclient]
+centos7test2
+
+[control]
+wtvbpf ansible_connection=local

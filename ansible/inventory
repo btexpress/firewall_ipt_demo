@@ -2,7 +2,7 @@
 wordpress
 
 [webclient]
-wtvbpf
+centos7test2
 
 [control]
-centos7test2 ansible_connection=local
+wtvbpf ansible_connection=local

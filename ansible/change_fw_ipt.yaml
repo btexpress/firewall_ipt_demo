@@ -1,17 +1,37 @@
 ---
 - hosts:  webserver
 
+  vars:
+    exec_dir:  /tmp
+
+  vars_prompt:
+    - name: "fw_action"
+      prompt:  "Enable or disable webserver access, 'enable' or 'disable':"
+      private: no
+      default: enable
+
   tasks:
-  - name:  test this block
+  - name:  copy firewal scritps to hosts
+    become: true
+    copy:
+      src={{ item }}
+      dest={{ exec_dir }}
+    with_items:
+      - scripts/open_firewall_22_80_only.sh
+      - scripts/open_firewall_22_only.sh
+
+  - name: Enable access to the website
     become: true
     command: "{{ item }}"
     with_items:
-      - hostname
-      - date
-      - touch /tmp/DELETEME
+      - "chmod 755 {{ exec_dir }}/open_firewall_22_80_only.sh"
+      - "{{ exec_dir }}/open_firewall_22_80_only.sh"
+    when: fw_action == "enable"
 
-
-# Allow all IPv4 traffic coming in on port 80 (http)
-  - iptables_raw:
-    name: allow_tcp_80
-    rules: '-A INPUT -p tcp -m tcp --dport 80 -j ACCEPT'
+  - name: Disable access to the website
+    become: true
+    command: "{{ item }}"
+    with_items:
+      - "chmod 755 {{ exec_dir }}/open_firewall_22_only.sh"
+      - "{{ exec_dir }}/open_firewall_22_only.sh"
+    when: fw_action == "disable"

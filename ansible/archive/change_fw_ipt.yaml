@@ -1,0 +1,35 @@
+---
+- hosts:  webserver
+
+  tasks:
+  - name:  test this block
+    become: true
+    command: "{{ item }}"
+    with_items:
+      - hostname
+      - date
+      - touch /tmp/DELETEME
+
+
+# Allow all IPv4 traffic coming in on port 80 (http)
+#  - name:  add these iptables rules
+#    iptables_raw:
+#      name: allow_tcp_80
+#      rules: '-A INPUT -p tcp -m tcp --dport 80 -j ACCEPT'
+
+  - name: Open the correct IPTables ports
+    lineinfile: dest=/etc/sysconfig/iptables
+#    regexp="^-A INPUT -p {{ item.protocol }} -m {{ item.protocol }} --dport {{ item.port }} -j ACCEPT$"
+    line="-A INPUT -p {{ item.protocol }} -m {{ item.protocol }} --dport {{ item.port }} -j ACCEPT"
+#    insertafter="^:OUTPUT ACCEPT \[\d*:\d*\]$"
+    insertafter="^:OUTPUT ACCEPT \[\d*:\d*\]"
+    with_items:
+      - { protocol: tcp, port: 80 }
+    notify:
+      - restart iptables
+ 
+  handlers:
+    - name: restart iptables
+      service: name=iptables state=restarted
+#      action: service name=iptables state=restarted
+ 
